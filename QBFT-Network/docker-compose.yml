@@ -1,0 +1,129 @@
+services:
+  Node1:
+    image: hyperledger/besu:latest
+    container_name: Node1
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./Node-1/data:/opt/besu/data
+    ports:
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+      - "8545:8545"
+      - "9545:9545"
+    networks:
+      qbft_net:
+        ipv4_address: 172.16.238.10
+    command: >
+      --genesis-file=/opt/besu/genesis.json
+      --data-path=/opt/besu/data
+      --node-private-key-file=/opt/besu/data/key
+      --data-storage-format=FOREST
+      --p2p-port=30303
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-api=ETH,NET,QBFT,ADMIN
+      --host-allowlist="*"
+      --rpc-http-cors-origins="*"
+      --metrics-enabled
+      --metrics-host=0.0.0.0
+
+  Node2:
+    image: hyperledger/besu:latest
+    container_name: Node2
+    depends_on:
+      - Node1
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./Node-2/data:/opt/besu/data
+    ports:
+      - "30304:30303/tcp"
+      - "30304:30303/udp"
+      - "8546:8545"
+      - "9546:9545"
+    networks:
+      qbft_net:
+        ipv4_address: 172.16.238.11
+    command: >
+      --genesis-file=/opt/besu/genesis.json
+      --data-path=/opt/besu/data
+      --node-private-key-file=/opt/besu/data/key
+      --data-storage-format=FOREST
+      --p2p-port=30303
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-api=ETH,NET,QBFT,ADMIN
+      --host-allowlist="*"
+      --rpc-http-cors-origins="*"
+      --metrics-enabled
+      --metrics-host=0.0.0.0
+      --bootnodes=enode://d7590a07e12fd09fb71664dfc51498d3c824da6b225dc2f7f583e1147a6d44a0bf05454d4d3bf356058f087447586b99d24e38a20954906daeb87297c7f4e655@172.16.238.10:30303
+
+  Node3:
+    image: hyperledger/besu:latest
+    container_name: Node3
+    depends_on:
+      - Node1
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./Node-3/data:/opt/besu/data
+    ports:
+      - "30305:30303/tcp"
+      - "30305:30303/udp"
+      - "8547:8545"
+      - "9547:9545"
+    networks:
+      qbft_net:
+        ipv4_address: 172.16.238.12
+    command: >
+      --genesis-file=/opt/besu/genesis.json
+      --data-path=/opt/besu/data
+      --node-private-key-file=/opt/besu/data/key
+      --data-storage-format=FOREST
+      --p2p-port=30303
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-api=ETH,NET,QBFT,ADMIN
+      --host-allowlist="*"
+      --rpc-http-cors-origins="*"
+      --metrics-enabled
+      --metrics-host=0.0.0.0
+      --bootnodes=enode://d7590a07e12fd09fb71664dfc51498d3c824da6b225dc2f7f583e1147a6d44a0bf05454d4d3bf356058f087447586b99d24e38a20954906daeb87297c7f4e655@172.16.238.10:30303
+
+  Node4:
+    image: hyperledger/besu:latest
+    container_name: Node4
+    depends_on:
+      - Node1
+    volumes:
+      - ./genesis.json:/opt/besu/genesis.json
+      - ./Node-4/data:/opt/besu/data
+    ports:
+      - "30306:30303/tcp"
+      - "30306:30303/udp"
+      - "8548:8545"
+      - "9548:9545"
+    networks:
+      qbft_net:
+        ipv4_address: 172.16.238.13
+    command: >
+      --genesis-file=/opt/besu/genesis.json
+      --data-path=/opt/besu/data
+      --node-private-key-file=/opt/besu/data/key
+      --data-storage-format=FOREST
+      --p2p-port=30303
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-api=ETH,NET,QBFT,ADMIN
+      --host-allowlist="*"
+      --rpc-http-cors-origins="*"
+      --metrics-enabled
+      --metrics-host=0.0.0.0
+      --bootnodes=enode://d7590a07e12fd09fb71664dfc51498d3c824da6b225dc2f7f583e1147a6d44a0bf05454d4d3bf356058f087447586b99d24e38a20954906daeb87297c7f4e655@172.16.238.10:30303
+
+networks:
+  qbft_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24

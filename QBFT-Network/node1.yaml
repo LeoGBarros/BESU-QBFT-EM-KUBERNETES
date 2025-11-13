@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: besu-node1
+  namespace: besu-qbft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: besu
+      node: node1
+  template:
+    metadata:
+      labels:
+        app: besu
+        node: node1
+    spec:
+      containers:
+      - name: besu
+        image: hyperledger/besu:latest
+        args:
+        - --genesis-file=/opt/besu/genesis.json
+        - --data-path=/opt/besu/data
+        - --node-private-key-file=/opt/besu/keys/key
+        - --data-storage-format=FOREST
+        - --p2p-port=30303
+        - --rpc-http-enabled
+        - --rpc-http-host=0.0.0.0
+        - --rpc-http-api=ETH,NET,QBFT,ADMIN
+        - --host-allowlist=*
+        - --rpc-http-cors-origins=*
+        - --metrics-enabled
+        - --metrics-host=0.0.0.0
+        ports:
+        - name: p2p
+          containerPort: 30303
+          protocol: TCP
+        - name: p2p-udp
+          containerPort: 30303
+          protocol: UDP
+        - name: rpc
+          containerPort: 8545
+          protocol: TCP
+        - name: metrics
+          containerPort: 9545
+          protocol: TCP
+        volumeMounts:
+        - name: genesis
+          mountPath: /opt/besu/genesis.json
+          subPath: genesis.json
+        - name: data
+          mountPath: /opt/besu/data
+        - name: nodekey
+          mountPath: /opt/besu/keys
+      volumes:
+      - name: genesis
+        configMap:
+          name: qbft-genesis
+      - name: data
+        emptyDir: {}
+      - name: nodekey
+        secret:
+          secretName: besu-node1-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: besu-node1-p2p
+  namespace: besu-qbft
+spec:
+  selector:
+    app: besu
+    node: node1
+  ports:
+  - name: p2p-tcp
+    port: 30303
+    targetPort: p2p
+    protocol: TCP
+  - name: p2p-udp
+    port: 30303
+    targetPort: p2p-udp
+    protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: besu-node1-rpc
+  namespace: besu-qbft
+spec:
+  type: NodePort
+  selector:
+    app: besu
+    node: node1
+  ports:
+  - name: rpc
+    port: 8545
+    targetPort: rpc
+    nodePort: 30001   
+  - name: metrics
+    port: 9545
+    targetPort: metrics
+    nodePort: 31001   
